@@ -37,3 +37,40 @@ def connect_to_mysql(host, username, password, database):
     except Exception as e:
         print(f'Error connecting to MySQL: {e}')
         return {'message': 'Connection failed'}
+
+# Fetch list of databases
+def get_mysql_databases(host, username, password):
+    try:
+        conn = mysql.connector.connect(
+            host=host,
+            user=username,
+            password=password
+        )
+        cursor = conn.cursor()
+        cursor.execute("SHOW DATABASES;")
+        dbs = [db[0] for db in cursor.fetchall()]
+        return {"databases": dbs}
+    except Exception as e:
+        return {"error": str(e)}
+
+# Fetch tables and views
+def get_mysql_objects(host, username, password, database):
+    try:
+        conn = mysql.connector.connect(
+            host=host,
+            user=username,
+            password=password,
+            database=database
+        )
+        cursor = conn.cursor()
+
+        cursor.execute("SHOW FULL TABLES WHERE Table_type='BASE TABLE';")
+        tables = [t[0] for t in cursor.fetchall()]
+
+        cursor.execute("SHOW FULL TABLES WHERE Table_type='VIEW';")
+        views = [v[0] for v in cursor.fetchall()]
+
+        return {"tables": tables, "views": views}
+    except Exception as e:
+        return {"error": str(e)}
+
